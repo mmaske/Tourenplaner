@@ -3,6 +3,68 @@ require 'spec_helper'
 describe UsersController do
   render_views
 
+  describe "POST 'create'" do
+
+    describe "failure" do
+
+      before(:each) do
+        @attr = { :name => "", :email => "", :password => "",
+                  :password_confirmation => "" }
+      end
+
+      it "should not create a user" do
+        lambda do
+          post :create, :user => @attr
+        end.should_not change(User, :count)
+      end
+
+      it "should have the right title" do
+        post :create, :user => @attr
+        response.should have_selector("title", :content => "Sign up")
+      end
+
+      it "should render the 'new' page" do
+        post :create, :user => @attr
+        response.should render_template('new')
+      end
+    end
+    describe "success" do
+
+      it "should make a new user" do
+        lambda do
+          visit signup_path
+          fill_in "Name",         :with => "Example User"
+          fill_in "Email",        :with => "user@example.com"
+          fill_in "Password",     :with => "foobar"
+          fill_in "Confirmation", :with => "foobar"
+          click_button
+          response.should have_selector("div.flash.success",
+                                        :content => "Welcome")
+          response.should render_template('users/show')
+        end.should change(User, :count).by(1)
+      end
+
+      before(:each) do
+        @attr = { :name => "New User", :email => "user@example.com",
+                  :password => "foobar", :password_confirmation => "foobar" }
+      end
+
+      it "should create a user" do
+        lambda do
+          post :create, :user => @attr
+        end.should change(User, :count).by(1)
+      end
+
+      it "should redirect to the user show page" do
+        post :create, :user => @attr
+        response.should redirect_to(user_path(assigns(:user)))
+      end
+      it "should have a welcome message" do
+        post :create, :user => @attr
+        flash[:success].should =~ /welcome to the sample app/i
+      end
+    end
+  end
   describe "GET 'show'" do
 
     before(:each) do

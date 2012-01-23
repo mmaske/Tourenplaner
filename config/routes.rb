@@ -1,4 +1,10 @@
 SampleApp2::Application.routes.draw do
+  get "vrp/new"
+
+  get "sessions/new"
+
+  resources :vehicles
+
   resources :nodes
 
   resources :users
