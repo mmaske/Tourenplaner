@@ -1,10 +1,9 @@
 SampleApp2::Application.routes.draw do
-  get "vrp/new"
+  resources :projects
 
   get "sessions/new"
 
   resources :vehicles
-
   resources :nodes
 
   resources :users
@@ -17,6 +16,8 @@ SampleApp2::Application.routes.draw do
   match '/signup', :to => 'users#new'
   match '/signin', :to => 'sessions#new'
   match '/signout', :to => 'sessions#destroy'
+  match '/My projects', :to => 'projects#new'
+  match 'projects/optimize', :to => 'projects#optimize'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

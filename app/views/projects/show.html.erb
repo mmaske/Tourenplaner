@@ -1,0 +1,11 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @project.name %>
+</p>
+<%= gmaps4rails(@json) %>
+<%= link_to 'choose nodes', nodes_path %> |
+<%= link_to 'Edit', edit_project_path(@project) %> |
+<%= link_to 'Back', projects_path %>
+<%= button_to "Optimiere", :controller => 'projects', :action =>  'optimize'  %>

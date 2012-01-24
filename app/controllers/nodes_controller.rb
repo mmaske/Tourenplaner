@@ -1,4 +1,6 @@
 class NodesController < ApplicationController
+
+
   # GET /nodes
   # GET /nodes.xml
   def index
@@ -38,7 +40,8 @@ class NodesController < ApplicationController
   # GET /nodes/1/edit
   def edit
     @node = Node.find(params[:id])
-    @json = Node.find(params[:id]).to_gmaps4rails
+    @json = Node.find(params[:id])
+    .to_gmaps4rails
 
   end
 
@@ -46,7 +49,7 @@ class NodesController < ApplicationController
   # POST /nodes.xml
   def create
     @node = Node.new(params[:node])
-
+    @json = Node.all.to_gmaps4rails
 
     respond_to do |format|
       if @node.save
@@ -63,7 +66,7 @@ class NodesController < ApplicationController
   # PUT /nodes/1.xml
   def update
     @node = Node.find(params[:id])
-    @json = Node.find(params[:id]).to_gmaps4rails
+    @json = Node.all.to_gmaps4rails
 
     respond_to do |format|
       if @node.update_attributes(params[:node])
@@ -80,7 +83,7 @@ class NodesController < ApplicationController
   # DELETE /nodes/1.xml
   def destroy
     @node = Node.find(params[:id])
-    @json = Node.find(params[:id]).to_gmaps4rails
+    @json = Node.all.to_gmaps4rails
 
     @node.destroy
 
