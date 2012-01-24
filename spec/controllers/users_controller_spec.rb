@@ -43,7 +43,10 @@ describe UsersController do
           response.should render_template('users/show')
         end.should change(User, :count).by(1)
       end
-
+      it "should sign the user in" do
+        post :create, :user => @attr
+        controller.should be_signed_in
+      end
       before(:each) do
         @attr = { :name => "New User", :email => "user@example.com",
                   :password => "foobar", :password_confirmation => "foobar" }
