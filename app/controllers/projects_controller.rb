@@ -7,7 +7,7 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       format.html # index.html.erb
-      format.xml  { render :xml => @projects }
+      format.xml { render :xml => @projects }
     end
   end
 
@@ -18,7 +18,7 @@ class ProjectsController < ApplicationController
     @json = Node.find(:all).to_gmaps4rails
     respond_to do |format|
       format.html # show.html.erb
-      format.xml  { render :xml => @project }
+      format.xml { render :xml => @project }
     end
   end
 
@@ -29,7 +29,7 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       format.html # new.html.erb
-      format.xml  { render :xml => @project }
+      format.xml { render :xml => @project }
     end
   end
 
@@ -48,10 +48,10 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       if @project.save
         format.html { redirect_to(@project, :notice => 'Project was successfully created.') }
-        format.xml  { render :xml => @project, :status => :created, :location => @project }
+        format.xml { render :xml => @project, :status => :created, :location => @project }
       else
         format.html { render :action => "new" }
-        format.xml  { render :xml => @project.errors, :status => :unprocessable_entity }
+        format.xml { render :xml => @project.errors, :status => :unprocessable_entity }
       end
     end
   end
@@ -64,10 +64,10 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       if @project.update_attributes(params[:project])
         format.html { redirect_to(@project, :notice => 'Project was successfully updated.') }
-        format.xml  { head :ok }
+        format.xml { head :ok }
       else
         format.html { render :action => "edit" }
-        format.xml  { render :xml => @project.errors, :status => :unprocessable_entity }
+        format.xml { render :xml => @project.errors, :status => :unprocessable_entity }
       end
     end
   end
@@ -80,60 +80,146 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to(projects_url) }
-      format.xml  { head :ok }
+      format.xml { head :ok }
     end
   end
 
-    def optimize
+  def optimize
     @project = Project.find(:all)
     @nodes = Node.find(:all)
-    if File.exist?("Transportmodell_v3_Input_Instanz1.inc")
-      File.delete("Transportmodell_v3_Input_Instanz1.inc")
+    @vehicles = Vehicle.find(:all)
+    if File.exist?("VRP_v1_Input_Instanz1.inc")
+      File.delete("VRP_v1_Input_Instanz1.inc")
     end
 
 ######print set#####
-    fil=File.new("Transportmodell_v3_Input_Instanz1.inc", "w") # w für write
+    fil=File.new("VRP_v1_Input_Instanz1.inc", "w") # w für write
     printf(fil, "set i / \n")
-   # @nodes = Node.find(params[:id]) # gib alle angebotsorte wieder
-    @nodes.each { |so| printf(fil, "i" + so.id.to_s + "\n") } #schreibe sie in die include datei
+
+    @nodes.each { |so|
+      if so.depot?
+        printf(fil, "d" + "\n")
+      else
+        printf(fil, "i" + so.id.to_s + "\n")
+      end } #schreibe sie in die include datei
     printf(fil, "/" + "\n\n")
+
+    printf(fil, " k / \n")
+    @vehicles.each { |so| printf(fil, "v" + so.id.to_s + "\n") } #schreibe sie in die include datei
+    printf(fil, "/;" + "\n\n")
 
 #####print distance matrix#####
-    printf(fil, "table j /"+"\n" + "%-5s","" )
-    @nodes.each do |i| printf(fil,"%-30s", "j" +i.id.to_s) end
-    printf(fil, "\n")
-    @nodes.each do |i| printf(fil,"%-5s", "i" +i.id.to_s)
-    @nodes.each do |j|
-    x=Gmaps4rails.destination(
-    {"from" => "#{i.street}+#{i.city}", "to" => "#{j.street}+#{j.city}"})
-    distance = x.first["distance"]["value"]
-    printf(fil,"%-30f",distance)
+    printf(fil, "table c(i,j)  "+"\n" + "%-5s", "")
+    @nodes.each do |i|
+      if i.depot?
+        printf(fil, "%-30s", "d")
+      else
+        printf(fil, "%-30s", "i" +i.id.to_s)
+      end
     end
     printf(fil, "\n")
+    @nodes.each do |i|
+      if i.depot?
+        printf(fil, "%-5s", "d")
+      else
+        printf(fil, "%-5s", "i" +i.id.to_s)
+      end
+      @nodes.each do |j|
+        if i!=j
+        x=Gmaps4rails.destination(
+            {"from" => "#{i.street}+#{i.city}", "to" => "#{j.street}+#{j.city}"})
+        distance = x.first["distance"]["value"]
+        printf(fil, "%-30f", distance)
+        else
+        printf(fil, "%-30s", "9999999999999999999999999")
+
+        end
+
+      end
+      printf(fil, "\n")
     end
-    printf(fil, "/" + "\n\n")
+    printf(fil, ";" + "\n\n")
 
 ####print duration matrix#####
-    printf(fil, "table t /"+"\n" + "%-5s","" )
-    @nodes.each do |i| printf(fil,"%-30s", "j" +i.id.to_s) end
-    printf(fil, "\n")
-    @nodes.each do |i| printf(fil,"%-5s", "i" +i.id.to_s)
-    @nodes.each do |j|
-    x=Gmaps4rails.destination(
-    {"from" => "#{i.street}+#{i.city}", "to" => "#{j.street}+#{j.city}"})
-    distance = x.first["duration"]["value"]
-    printf(fil,"%-30f",distance)
+    printf(fil, "table t(i,j) "+"\n" + "%-5s", "")
+    @nodes.each do |i|
+      if i.depot?
+        printf(fil, "%-30s", "d")
+      else
+        printf(fil, "%-30s", "i" +i.id.to_s)
+      end
     end
     printf(fil, "\n")
+    @nodes.each do |i|
+      if i.depot?
+        printf(fil, "%-5s", "d")
+      else
+        printf(fil, "%-5s", "i" +i.id.to_s)
+      end
+      @nodes.each do |j|
+        if i!=j
+        x=Gmaps4rails.destination(
+            {"from" => "#{i.street}+#{i.city}", "to" => "#{j.street}+#{j.city}"})
+        distance = x.first["duration"]["value"]
+        printf(fil, "%-30f", distance)
+        else
+        printf(fil, "%-30s", "9999999999999999999999999")
+
+        end
+
+      end
+      printf(fil, "\n")
     end
-    printf(fil, "/" + "\n\n")
-      fil.close
+    printf(fil, ";" + "\n\n")
+
+#####Depot Knoten definieren#####
+    printf(fil, "Kundenknoten(i) = yes;\n")
+
+    @nodes.each do |li|
+      if li.depot?
+        printf(fil, "Kundenknoten('d') = no;"+"\n")
+        #printf(fil, "Kundenknoten('d#{li.id.to_s}') = no;"+"\n")
+      end
+    end
+    printf(fil, "\n\n")
+
+#####Fahrzeugkapazitäten definieren#####
+    printf(fil, "parameter cap(k) /"+"\n")
+
+    @vehicles.each do |k|
+      printf(fil, "%-5s", "v" +k.id.to_s)
+      cap=k.Capacity
+      printf(fil, "%-5f", cap)
+      printf(fil, "\n")
+    end
+    printf(fil, "/;" + "\n\n")
+
+#####Nachfrage definieren#####
+    printf(fil, "parameter d(i) /"+"\n")
+
+    @nodes.each do |k|
+      if k.depot?
+        printf(fil, "%-5s", "d","")
+        printf(fil, "%-5f", "0")
+        printf(fil, "\n")
+      else
+        printf(fil, "%-5s", "i" +k.id.to_s)
+
+        demand=k.demand
+        printf(fil, "%-5f", demand)
+        printf(fil, "\n")
+      end
+    end
+    printf(fil, "/;" + "\n\n")
+    fil.close
+
+    system "gams VRP"
 
     respond_to do |format|
       format.html { redirect_to(projects_url) }
-      format.xml  { render :xml => @project }
+      format.xml { render :xml => @project }
     end
-    end
+  end
 
 #    printf(f, "l / \n")
 #    @transport_links = TransportLink.find(:all)
@@ -141,32 +227,29 @@ class ProjectsController < ApplicationController
 #    printf(f, "/;" + "\n\n")
 
 
-#    printf(f, "LI(l,i) = no;\n")
-#    printf(f, "LJ(l,j) = no;\n\n")
+#   @transport_links.each do |li|
+#     printf(f, "LI( 'l" + li.id.to_s + "', 'i" + li.source_id.to_s + "') = yes;\n")
+#     printf(f, "LJ( 'l" + li.id.to_s + "', 'j" + li.sink_id.to_s + "') = yes;\n\n")
+#   end
+#   printf(f, "\n\n")
 
- #   @transport_links.each do |li|
- #     printf(f, "LI( 'l" + li.id.to_s + "', 'i" + li.source_id.to_s + "') = yes;\n")
- #     printf(f, "LJ( 'l" + li.id.to_s + "', 'j" + li.sink_id.to_s + "') = yes;\n\n")
- #   end
- #   printf(f, "\n\n")
+#   printf(f, "Parameter\n  A(i) /\n")
 
- #   printf(f, "Parameter\n  A(i) /\n")
+#   @sources.each { |so| printf(f, "i" + so.id.to_s + "  " + so.supply_quantity.to_s + "\n") }
+#   printf(f, "/" + "\n\n")
 
- #   @sources.each { |so| printf(f, "i" + so.id.to_s + "  " + so.supply_quantity.to_s + "\n") }
- #   printf(f, "/" + "\n\n")
+#   printf(f, "\nN(j) /\n")
 
- #   printf(f, "\nN(j) /\n")
+#   @sinks.each { |si| printf(f, "j" + si.id.to_s + "  " + si.demand_quantity.to_s + "\n") }
+#   printf(f, "/" + "\n\n")
 
- #   @sinks.each { |si| printf(f, "j" + si.id.to_s + "  " + si.demand_quantity.to_s + "\n") }
- #   printf(f, "/" + "\n\n")
+#   printf(f, "\nc(l) /\n")
 
- #   printf(f, "\nc(l) /\n")
+#   @transport_links.each { |li| printf(f, "l" + li.id.to_s + "  " + li.unit_cost.to_s + "\n") }
+#   printf(f, "/" + "\n\n")
 
- #   @transport_links.each { |li| printf(f, "l" + li.id.to_s + "  " + li.unit_cost.to_s + "\n") }
- #   printf(f, "/" + "\n\n")
-
- #   printf(f, ";\n")
- #   fil.close # schliessen der include datei
+#   printf(f, ";\n")
+#   fil.close # schliessen der include datei
 
 
 #    if File.exist?("Transportmengen_v2.txt") # datei mit der vorherigen lösung löschen
@@ -175,7 +258,7 @@ class ProjectsController < ApplicationController
 
 
 #    system "gams Transportmodell_v2" # rufe gams auf und arebite das transportmodell ab
-                                                             ## system "C:\\Progra~\\Gams23,7\\gams Transportmodell_v2"                             # rufe gams auf und arebite das transportmodell ab
+## system "C:\\Progra~\\Gams23,7\\gams Transportmodell_v2"                             # rufe gams auf und arebite das transportmodell ab
 #    @transport_links = TransportLink.find(:all)
 #    render :template => "transport_links/index"
 #  end

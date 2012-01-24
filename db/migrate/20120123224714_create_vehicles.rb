@@ -1,7 +1,7 @@
 class CreateVehicles < ActiveRecord::Migration
   def self.up
     create_table :vehicles do |t|
-      t.string :vehicleID
+      t.string :VehicleName
       t.string :Type
       t.float :Capacity
 

@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(:version => 20120124005023) do
     t.string   "city"
     t.string   "country"
     t.float    "demand"
+    t.boolean  "depot"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -42,9 +43,15 @@ ActiveRecord::Schema.define(:version => 20120124005023) do
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
 
   create_table "vehicles", :force => true do |t|
-    t.string   "vehicleID"
+    t.string   "VehicleName"
     t.string   "Type"
     t.float    "Capacity"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "vrps", :force => true do |t|
+    t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

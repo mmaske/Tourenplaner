@@ -40,8 +40,7 @@ class NodesController < ApplicationController
   # GET /nodes/1/edit
   def edit
     @node = Node.find(params[:id])
-    @json = Node.find(params[:id])
-    .to_gmaps4rails
+    @json = Node.find(params[:id]).to_gmaps4rails
 
   end
 

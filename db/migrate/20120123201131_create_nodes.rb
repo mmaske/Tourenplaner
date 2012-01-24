@@ -8,6 +8,7 @@ class CreateNodes < ActiveRecord::Migration
       t.string :city
       t.string :country
       t.float :demand
+      t.boolean :depot
 
       t.timestamps
     end
