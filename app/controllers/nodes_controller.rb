@@ -82,8 +82,6 @@ class NodesController < ApplicationController
   # DELETE /nodes/1.xml
   def destroy
     @node = Node.find(params[:id])
-    @json = Node.all.to_gmaps4rails
-
     @node.destroy
 
     respond_to do |format|

@@ -221,35 +221,6 @@ class ProjectsController < ApplicationController
     end
   end
 
-#    printf(f, "l / \n")
-#    @transport_links = TransportLink.find(:all)
-#    @transport_links.each { |li| printf(f, "l" + li.id.to_s + "\n") }
-#    printf(f, "/;" + "\n\n")
-
-
-#   @transport_links.each do |li|
-#     printf(f, "LI( 'l" + li.id.to_s + "', 'i" + li.source_id.to_s + "') = yes;\n")
-#     printf(f, "LJ( 'l" + li.id.to_s + "', 'j" + li.sink_id.to_s + "') = yes;\n\n")
-#   end
-#   printf(f, "\n\n")
-
-#   printf(f, "Parameter\n  A(i) /\n")
-
-#   @sources.each { |so| printf(f, "i" + so.id.to_s + "  " + so.supply_quantity.to_s + "\n") }
-#   printf(f, "/" + "\n\n")
-
-#   printf(f, "\nN(j) /\n")
-
-#   @sinks.each { |si| printf(f, "j" + si.id.to_s + "  " + si.demand_quantity.to_s + "\n") }
-#   printf(f, "/" + "\n\n")
-
-#   printf(f, "\nc(l) /\n")
-
-#   @transport_links.each { |li| printf(f, "l" + li.id.to_s + "  " + li.unit_cost.to_s + "\n") }
-#   printf(f, "/" + "\n\n")
-
-#   printf(f, ";\n")
-#   fil.close # schliessen der include datei
 
 
 #    if File.exist?("Transportmengen_v2.txt") # datei mit der vorherigen lösung löschen

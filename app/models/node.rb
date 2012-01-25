@@ -4,4 +4,4 @@ acts_as_gmappable :process_geocoding => true, :validation =>true
   "#{self.street}, #{self.city}, #{self.country}"
   end
   belongs_to :project, :class_name => "Project"
-end
+  end
